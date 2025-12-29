@@ -1,6 +1,7 @@
 {
   "id": "large-cage",
   "name": "Large Cage",
+  "icon": "/assets/images/items/large-cage.png",
   "description": "A large cage used to catch octopus and other large crustaceans.",
   "item_type": "Fishing Tool",
   "level_requirement": 0,

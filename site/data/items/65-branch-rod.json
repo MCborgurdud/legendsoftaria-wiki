@@ -1,6 +1,7 @@
 {
   "id": "branch-rod",
   "name": "Branch Rod",
+  "icon": "/assets/images/items/branch-rod.png",
   "description": "A basic fishing rod made from a branch. Used to catch fish.",
   "item_type": "Fishing Tool",
   "level_requirement": 0,

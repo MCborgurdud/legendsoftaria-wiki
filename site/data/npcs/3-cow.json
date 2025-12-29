@@ -1,6 +1,7 @@
 {
   "id": "cow",
   "name": "Cow",
+  "icon": "/assets/images/npcs/cow.png",
   "location": "Farms and fields",
   "role": "Monster",
   "description": "Cow that can be fought for combat experience and loot.",

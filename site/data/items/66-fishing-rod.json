@@ -1,6 +1,7 @@
 {
   "id": "fishing-rod",
   "name": "Fishing Rod",
+  "icon": "/assets/images/items/fishing-rod.png",
   "description": "A sturdy fishing rod. Used to catch fish.",
   "item_type": "Fishing Tool",
   "level_requirement": 0,

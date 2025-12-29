@@ -1,6 +1,7 @@
 {
   "id": "rat2",
   "name": "Rat",
+  "icon": "/assets/images/npcs/rat2.png",
   "location": "Sewers and basements",
   "role": "Monster",
   "description": "Rat that can be fought for combat experience and loot.",

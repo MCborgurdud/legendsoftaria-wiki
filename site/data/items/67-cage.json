@@ -1,6 +1,7 @@
 {
   "id": "cage",
   "name": "Cage",
+  "icon": "/assets/images/items/cage.png",
   "description": "A cage used to catch crustaceans.",
   "item_type": "Fishing Tool",
   "level_requirement": 0,

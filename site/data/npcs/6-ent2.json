@@ -1,6 +1,7 @@
 {
   "id": "ent2",
   "name": "Ent",
+  "icon": "/assets/images/npcs/ent2.png",
   "location": "Forests",
   "role": "Monster",
   "description": "Ent that can be fought for combat experience and loot.",

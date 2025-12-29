@@ -1,6 +1,7 @@
 {
   "id": "goblin2",
   "name": "Goblin",
+  "icon": "/assets/images/npcs/goblin2.png",
   "location": "Goblin camps and caves",
   "role": "Monster",
   "description": "Goblin that can be fought for combat experience and loot.",

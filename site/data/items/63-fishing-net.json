@@ -1,6 +1,7 @@
 {
   "id": "fishing-net",
   "name": "Fishing Net",
+  "icon": "/assets/images/items/fishing-net.png",
   "description": "A fishing net. Used to catch shrimp and other small fish.",
   "item_type": "Fishing Tool",
   "level_requirement": 0,
