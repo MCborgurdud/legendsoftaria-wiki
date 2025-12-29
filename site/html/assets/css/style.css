@@ -25,10 +25,10 @@
     
     /* Text hierarchy */
     --text-bright: #ffffff;
-    --text-primary: #e4e4e7;
-    --text-secondary: #a1a1aa;
-    --text-muted: #71717a;
-    --text-faint: #52525b;
+    --text-primary: #efefef;
+    --text-secondary: #efefef;
+    --text-muted: #a1a1aa;
+    --text-faint: #71717a;
     
     /* Borders with subtle depth */
     --border-subtle: rgba(255, 255, 255, 0.06);
