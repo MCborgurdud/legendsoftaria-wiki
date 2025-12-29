@@ -39,3 +39,23 @@ pub fn copy_static_assets() -> Result<()> {
     println!("Copied {} static assets", count);
     Ok(())
 }
+
+/// Copy robots.txt and sitemap.txt from html/ to out/
+pub fn copy_root_files() -> Result<()> {
+    let root_files = ["robots.txt", "sitemap.txt"];
+    let mut count = 0;
+
+    for filename in &root_files {
+        let src = config::html_dir().join(filename);
+        let dest = config::output_dir().join(filename);
+
+        if src.exists() {
+            fs::create_dir_all(config::output_dir())?;
+            fs::copy(&src, &dest).with_context(|| format!("failed to copy {:?}", src))?;
+            count += 1;
+        }
+    }
+
+    println!("Copied {} root files (robots.txt, sitemap.txt)", count);
+    Ok(())
+}

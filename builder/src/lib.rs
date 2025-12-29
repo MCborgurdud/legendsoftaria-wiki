@@ -15,6 +15,7 @@ pub fn build_wiki(base_path: Option<&Path>) -> anyhow::Result<()> {
     println!("================================");
 
     output::copy_static_assets()?;
+    output::copy_root_files()?;
 
     let tera = render::init_tera()?;
 
