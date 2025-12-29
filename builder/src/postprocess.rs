@@ -12,6 +12,30 @@ static NPC_PATTERN: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r#"<npc\s+name="([^"]+)"[^>]*>([^<]*)</npc>"#).unwrap()
 });
 
+/// Regex pattern to match shorthand item markup: <item:item-id>
+static ITEM_SHORT_PATTERN: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r#"<item:([a-z0-9-]+)>"#).unwrap()
+});
+
+/// Regex pattern to match shorthand NPC markup: <npc:npc-id>
+static NPC_SHORT_PATTERN: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r#"<npc:([a-z0-9-]+)>"#).unwrap()
+});
+
+/// Convert an id to a display name (e.g., "iron-ore" -> "Iron Ore")
+fn id_to_display_name(id: &str) -> String {
+    id.split('-')
+        .map(|word| {
+            let mut chars = word.chars();
+            match chars.next() {
+                Some(first) => first.to_uppercase().collect::<String>() + chars.as_str(),
+                None => String::new(),
+            }
+        })
+        .collect::<Vec<_>>()
+        .join(" ")
+}
+
 /// Generate an item link with icon
 fn item_link(item_id: &str, display_text: &str) -> String {
     format!(
@@ -32,6 +56,7 @@ fn npc_link(npc_id: &str, display_text: &str) -> String {
 pub fn linkify_references(text: &str) -> String {
     let mut result = text.to_string();
 
+    // Handle verbose item syntax: <item name="id">text</item>
     result = ITEM_PATTERN
         .replace_all(&result, |caps: &regex::Captures| {
             let item_id = &caps[1];
@@ -40,11 +65,30 @@ pub fn linkify_references(text: &str) -> String {
         })
         .to_string();
 
+    // Handle verbose NPC syntax: <npc name="id">text</npc>
     result = NPC_PATTERN
         .replace_all(&result, |caps: &regex::Captures| {
             let npc_id = &caps[1];
             let display_text = &caps[2];
             npc_link(npc_id, display_text)
+        })
+        .to_string();
+
+    // Handle shorthand item syntax: <item:id>
+    result = ITEM_SHORT_PATTERN
+        .replace_all(&result, |caps: &regex::Captures| {
+            let item_id = &caps[1];
+            let display_text = id_to_display_name(item_id);
+            item_link(item_id, &display_text)
+        })
+        .to_string();
+
+    // Handle shorthand NPC syntax: <npc:id>
+    result = NPC_SHORT_PATTERN
+        .replace_all(&result, |caps: &regex::Captures| {
+            let npc_id = &caps[1];
+            let display_text = id_to_display_name(npc_id);
+            npc_link(npc_id, &display_text)
         })
         .to_string();
 
