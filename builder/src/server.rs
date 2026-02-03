@@ -18,7 +18,7 @@ pub fn start_server(base_path: &Path, build_counter: Arc<AtomicU64>) -> Result<(
     let server = Server::http(addr)
         .map_err(|e| anyhow::anyhow!("failed to start web server: {}", e))?;
 
-    println!("✓ Server running at http://{}/", addr);
+    println!("Server running at http://{}/", addr);
 
     let out_dir = config::output_dir();
 

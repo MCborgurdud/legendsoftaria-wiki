@@ -16,14 +16,11 @@ pub fn watch_mode(base_path: &Path) -> Result<()> {
     config::set_base_path(base_path);
 
     println!();
-    println!("╔════════════════════════════════════════╗");
-    println!("║   🔍 Wiki Builder - WATCH MODE 👀    ║");
-    println!("║   Listening for file changes...        ║");
-    println!("╠════════════════════════════════════════╣");
-    println!("║  Press Ctrl+C to stop                  ║");
-    println!("║  Hint: Run with '--build' for one-time ║");
-    println!("║  Server: http://127.0.0.1:8080/        ║");
-    println!("╚════════════════════════════════════════╝");
+    println!("Wiki Builder - WATCH MODE");
+    println!("Listening for file changes...");
+    println!("Press Ctrl+C to stop");
+    println!("Hint: Run with '--build' for one-time");
+    println!("Server: http://127.0.0.1:8080/");
     println!();
 
     let build_counter = Arc::new(AtomicU64::new(0));
@@ -34,20 +31,24 @@ pub fn watch_mode(base_path: &Path) -> Result<()> {
     // Create a debounced watcher - waits for file changes to settle
     let mut watcher = notify::recommended_watcher(move |event: notify::Result<notify::Event>| {
         if let Ok(event) = event {
+            // Debug: print all incoming events and paths
+            // if !event.paths.is_empty() {
+            //     let paths: Vec<String> = event
+            //         .paths
+            //         .iter()
+            //         .map(|p| p.to_string_lossy().replace('\\', "/"))
+            //         .collect();
+            //     println!("[watch] event: {:?} | paths: {}", event.kind, paths.join(", "));
+            // } else {
+            //     println!("[watch] event: {:?}", event.kind);
+            // }
             // Filter out non-relevant events and emit on file operations
             match event.kind {
                 notify::EventKind::Create(_)
                 | notify::EventKind::Modify(_)
                 | notify::EventKind::Remove(_) => {
-                    // Only watch relevant directories
-                    if event.paths.iter().any(|p| {
-                        let path_str = p.to_string_lossy().to_lowercase();
-                        path_str.contains("site/data")
-                            || path_str.contains("site/html")
-                            || path_str.contains("site/templates")
-                    }) {
-                        let _ = tx.send(());
-                    }
+                    // Watch the entire site directory (recursive)
+                    let _ = tx.send(());
                 }
                 _ => {}
             }
@@ -60,42 +61,47 @@ pub fn watch_mode(base_path: &Path) -> Result<()> {
         watcher.watch(&site_dir, notify::RecursiveMode::Recursive)?;
     }
 
-    println!("✓ Watching for changes in site/\n");
+    println!("Watching for changes in site/\n");
 
     if let Err(err) = run_build(base_path) {
-        println!("┌─ ✗ Initial build failed: {}\n", err);
+        println!("Initial build failed: {}\n", err);
         print_error_box();
     } else {
         build_counter.fetch_add(1, Ordering::SeqCst);
-        println!("┌─ ✓ Initial build successful!\n");
+        println!("Initial build successful!\n");
     }
 
     let mut last_build = Instant::now();
-    let debounce_duration = Duration::from_millis(300);
+    let debounce_duration = Duration::from_millis(600);
 
     loop {
         // Wait for file change events with debouncing
         if let Ok(()) = rx.recv() {
-            // Debounce: ignore rapid successive changes
+            // Debounce: wait for a quiet period to avoid duplicate rebuilds
             if last_build.elapsed() < debounce_duration {
                 std::thread::sleep(debounce_duration);
-                // Drain remaining events in the queue
-                while rx.try_recv().is_ok() {
-                    std::thread::sleep(Duration::from_millis(50));
+            }
+
+            // Keep waiting until no events arrive within the debounce window
+            loop {
+                match rx.recv_timeout(debounce_duration) {
+                    Ok(()) => continue,
+                    Err(mpsc::RecvTimeoutError::Timeout) => break,
+                    Err(_) => break,
                 }
             }
 
             last_build = Instant::now();
-            println!("┌─ 📝 Changes detected...");
+            println!("Changes detected...");
 
             // Run the build
             match run_build(base_path) {
                 Ok(()) => {
                     build_counter.fetch_add(1, Ordering::SeqCst);
-                    println!("└─ ✓ Build successful!\n");
+                    println!("Build successful!\n");
                 }
                 Err(e) => {
-                    println!("└─ ✗ Build failed: {}\n", e);
+                    println!("Build failed: {}\n", e);
                     print_error_box();
                     // Continue watching instead of crashing
                 }
@@ -125,10 +131,10 @@ fn run_build(base_path: &Path) -> Result<()> {
 }
 
 fn print_error_box() {
-    println!("┌──────────────────────────────────────┐");
-    println!("│  ⚠ The build has errors above       │");
-    println!("│  ⚠ Previous build remains intact     │");
-    println!("│  👉 Fix the issues and save files    │");
-    println!("└──────────────────────────────────────┘");
+    println!("----------------------------------------");
+    println!("The build has errors above");
+    println!("Previous build remains intact");
+    println!("Fix the issues and save files");
+    println!("----------------------------------------");
     println!();
 }
