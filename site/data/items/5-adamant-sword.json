@@ -7,5 +7,6 @@
   "damage": 23,
   "level_requirement": 1,
   "acquisition": "Smithed from <item:adamant-bar> at an anvil.",
-  "sell_price": 349
+  "sell_price": 349,
+  "notes": "Recommended for players at level 30 and above."
 }
