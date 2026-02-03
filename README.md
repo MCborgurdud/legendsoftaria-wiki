@@ -17,6 +17,7 @@ build-watch.bat     # Windows
 ```
 
 Press `Ctrl+C` to stop.
+Watch mode also starts a local server at http://127.0.0.1:8080/ with live reload.
 
 ## Making Changes
 

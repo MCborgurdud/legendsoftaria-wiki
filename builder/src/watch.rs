@@ -1,13 +1,20 @@
 use anyhow::Result;
 use notify::Watcher;
 use std::path::Path;
-use std::sync::mpsc;
+use std::sync::{
+    atomic::{AtomicU64, Ordering},
+    mpsc,
+    Arc,
+};
 use std::time::{Duration, Instant};
 
 use crate::config;
+use crate::server;
 
 /// Watch mode: monitors source files and rebuilds on changes
 pub fn watch_mode(base_path: &Path) -> Result<()> {
+    config::set_base_path(base_path);
+
     println!();
     println!("╔════════════════════════════════════════╗");
     println!("║   🔍 Wiki Builder - WATCH MODE 👀    ║");
@@ -15,8 +22,12 @@ pub fn watch_mode(base_path: &Path) -> Result<()> {
     println!("╠════════════════════════════════════════╣");
     println!("║  Press Ctrl+C to stop                  ║");
     println!("║  Hint: Run with '--build' for one-time ║");
+    println!("║  Server: http://127.0.0.1:8080/        ║");
     println!("╚════════════════════════════════════════╝");
     println!();
+
+    let build_counter = Arc::new(AtomicU64::new(0));
+    server::start_server(base_path, Arc::clone(&build_counter))?;
 
     let (tx, rx) = mpsc::channel();
 
@@ -51,6 +62,14 @@ pub fn watch_mode(base_path: &Path) -> Result<()> {
 
     println!("✓ Watching for changes in site/\n");
 
+    if let Err(err) = run_build(base_path) {
+        println!("┌─ ✗ Initial build failed: {}\n", err);
+        print_error_box();
+    } else {
+        build_counter.fetch_add(1, Ordering::SeqCst);
+        println!("┌─ ✓ Initial build successful!\n");
+    }
+
     let mut last_build = Instant::now();
     let debounce_duration = Duration::from_millis(300);
 
@@ -72,6 +91,7 @@ pub fn watch_mode(base_path: &Path) -> Result<()> {
             // Run the build
             match run_build(base_path) {
                 Ok(()) => {
+                    build_counter.fetch_add(1, Ordering::SeqCst);
                     println!("└─ ✓ Build successful!\n");
                 }
                 Err(e) => {

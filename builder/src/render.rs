@@ -41,7 +41,7 @@ pub fn render_items(tera: &Tera, items: &[Item]) -> Result<()> {
         fs::write(&out_path, html)
             .with_context(|| format!("failed to write item page {:?}", out_path))?;
 
-        println!("  → items/{}.html", item.id);
+        //println!("  → items/{}.html", item.id);
     }
 
     Ok(())
@@ -73,7 +73,7 @@ pub fn render_npcs(tera: &Tera, npcs: &[Npc], items: &[Item]) -> Result<()> {
         fs::write(&out_path, html)
             .with_context(|| format!("failed to write npc page {:?}", out_path))?;
 
-        println!("  → npcs/{}.html", npc.id);
+        //println!("  → npcs/{}.html", npc.id);
     }
 
     Ok(())
@@ -104,7 +104,7 @@ pub fn render_regular_pages(tera: &Tera, pages: &[Page]) -> Result<()> {
         fs::write(&out_path, html)
             .with_context(|| format!("failed to write page {:?}", out_path))?;
 
-        println!("  → {}.html", page.slug);
+        //println!("  → {}.html", page.slug);
     }
 
     Ok(())
@@ -127,7 +127,7 @@ pub fn render_indexes(tera: &Tera, items: &[Item], npcs: &[Npc], pages: &[Page])
         .context("failed to render root index")?;
     let out_path = config::output_dir().join("index.html");
     fs::write(&out_path, html).with_context(|| format!("failed to write index {:?}", out_path))?;
-    println!("  → index.html");
+    //println!("  → index.html");
 
     let items_html = tera
         .render("items_index.html", &ctx)
@@ -138,7 +138,7 @@ pub fn render_indexes(tera: &Tera, items: &[Item], npcs: &[Npc], pages: &[Page])
     }
     fs::write(&items_index_path, items_html)
         .with_context(|| format!("failed to write items index {:?}", items_index_path))?;
-    println!("  → items/index.html");
+    //println!("  → items/index.html");
 
     let npcs_html = tera
         .render("npcs_index.html", &ctx)
@@ -149,7 +149,7 @@ pub fn render_indexes(tera: &Tera, items: &[Item], npcs: &[Npc], pages: &[Page])
     }
     fs::write(&npcs_index_path, npcs_html)
         .with_context(|| format!("failed to write npcs index {:?}", npcs_index_path))?;
-    println!("  → npcs/index.html");
+    //println!("  → npcs/index.html");
 
     Ok(())
 }

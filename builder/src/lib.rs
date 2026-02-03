@@ -4,6 +4,7 @@ mod output;
 mod postprocess;
 mod render;
 mod watch;
+mod server;
 
 use std::path::Path;
 
