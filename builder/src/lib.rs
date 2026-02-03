@@ -3,6 +3,8 @@ mod data;
 mod output;
 mod postprocess;
 mod render;
+mod watch;
+mod server;
 
 use std::path::Path;
 
@@ -36,4 +38,8 @@ pub fn build_wiki(base_path: Option<&Path>) -> anyhow::Result<()> {
     println!("================================");
     println!("Wiki generated successfully!");
     Ok(())
+}
+
+pub fn watch_mode(base_path: &Path) -> anyhow::Result<()> {
+    watch::watch_mode(base_path)
 }

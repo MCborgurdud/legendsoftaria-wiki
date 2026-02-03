@@ -149,6 +149,30 @@
             }
         })();
     </script>
+    <script>
+        // Live reload (watch mode server)
+        (function () {
+            let lastBuild = null;
+
+            async function checkReload() {
+                try {
+                    const res = await fetch('/__reload', { cache: 'no-store' });
+                    if (!res.ok) return;
+                    const data = await res.json();
+                    if (lastBuild !== null && data.build !== lastBuild) {
+                        window.location.reload();
+                        return;
+                    }
+                    lastBuild = data.build;
+                } catch (err) {
+                    // Ignore errors (server not running)
+                }
+            }
+
+            setInterval(checkReload, 1000);
+            checkReload();
+        })();
+    </script>
 </body>
 
 </html>
