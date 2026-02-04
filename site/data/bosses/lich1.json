@@ -1,0 +1,13 @@
+{
+    "id": "lich1",
+    "name": "Lich",
+    "icon": "./assets/images/npcs/lich1.png",
+    "location": "Dark dungeons",
+    "role": "Boss",
+    "description": "Lich that can be fought for combat experience and loot.",
+    "level": 40,
+    "hitpoints": 60,
+    "drops": [
+        "Various items"
+    ]
+}

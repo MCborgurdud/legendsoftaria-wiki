@@ -33,6 +33,24 @@ pub struct Item {
 }
 
 #[derive(Debug, Deserialize, Serialize)]
+pub struct Boss {
+    pub id: String,
+    pub name: String,
+    pub icon: String,
+    pub location: String,
+    pub role: String,
+    pub description: String,
+    #[serde(default)]
+    pub level: Option<i32>,
+    #[serde(default)]
+    pub hitpoints: Option<i32>,
+    #[serde(default)]
+    pub drops: Vec<String>,
+    #[serde(default)]
+    pub notes: String,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Npc {
     pub id: String,
     pub name: String,
@@ -54,6 +72,22 @@ pub struct Page {
     pub slug: String,
     pub title: String,
     pub body_html: String,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct BossRoom {
+    pub id: String,
+    pub name: String,
+    pub location: String,
+    pub role: String,
+    pub description: String,
+    #[serde(default)]
+    pub bosses: Vec<Boss>,
+    pub level: Option<i32>,
+    #[serde(default)]
+    pub hitpoints: Option<i32>,
+    #[serde(default)]
+    pub notes: String,
 }
 
 /// Enriched drop information for rendering NPC drops with item links and prices
@@ -94,6 +128,66 @@ pub fn load_items() -> Result<Vec<Item>> {
 
     items.sort_by(|a, b| a.name.cmp(&b.name));
     Ok(items)
+}
+
+pub fn load_bosses() -> Result<Vec<Boss>> {
+    let mut bosses = Vec::new();
+    let dir = config::data_dir().join("bosses");
+
+    if !dir.exists() {
+        return Ok(bosses);
+    }
+
+    for entry in fs::read_dir(&dir)? {
+        let entry = entry?;
+        let path = entry.path();
+
+        if path.extension().and_then(|e| e.to_str()) != Some("json") {
+            continue;
+        }
+
+        let mut file =
+            fs::File::open(&path).with_context(|| format!("failed to open boss file {:?}", path))?;
+        let mut buf = String::new();
+        file.read_to_string(&mut buf)?;
+
+        let boss: Boss = serde_json::from_str(&buf)
+            .with_context(|| format!("failed to parse boss JSON {:?}", path))?;
+        bosses.push(boss);
+    }
+
+    bosses.sort_by(|a, b| a.name.cmp(&b.name));
+    Ok(bosses)
+}
+
+pub fn load_boss_rooms() -> Result<Vec<BossRoom>> {
+    let mut boss_rooms = Vec::new();
+    let dir = config::data_dir().join("boss-rooms");
+
+    if !dir.exists() {
+        return Ok(boss_rooms);
+    }
+
+    for entry in fs::read_dir(&dir)? {
+        let entry = entry?;
+        let path = entry.path();
+
+        if path.extension().and_then(|e| e.to_str()) != Some("json") {
+            continue;
+        }
+
+        let mut file = fs::File::open(&path)
+            .with_context(|| format!("failed to open boss room file {:?}", path))?;
+        let mut buf = String::new();
+        file.read_to_string(&mut buf)?;
+
+        let room: BossRoom = serde_json::from_str(&buf)
+            .with_context(|| format!("failed to parse boss room JSON {:?}", path))?;
+        boss_rooms.push(room);
+    }
+
+    boss_rooms.sort_by(|a, b| a.name.cmp(&b.name));
+    Ok(boss_rooms)
 }
 
 pub fn load_npcs() -> Result<Vec<Npc>> {
@@ -177,6 +271,10 @@ pub fn load_pages() -> Result<Vec<Page>> {
 }
 
 pub fn load_npc_notes(_id: &str) -> Result<String> {
+    Ok(String::new())
+}
+
+pub fn load_boss_notes(_id: &str) -> Result<String> {
     Ok(String::new())
 }
 

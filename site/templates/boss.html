@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block title %}{{ boss.name }} - Legends of Taria Wiki{% endblock title %}
+
+{% block content %}
+<main class="site-main">
+<article class="boss-page">
+    {# Page title with boss icon #}
+    <h2 class="page-title">
+        <img src="/assets/images/npcs/{{ boss.id }}.png" alt="{{ boss.name }}" class="title-icon" />
+        {{ boss.name }}
+    </h2>
+
+    {# Infobox for boss stats #}
+    <div class="infobox">
+        <div class="infobox-header">
+            <img src="/assets/images/npcs/{{ boss.id }}.png" alt="{{ boss.name }}" class="infobox-image" />
+            <h3>{{ boss.name }}</h3>
+        </div>
+        <table>
+            <tr>
+                <th>Location</th>
+                <td>{{ boss.location }}</td>
+            </tr>
+            <tr>
+                <th>Role</th>
+                <td>{{ boss.role }}</td>
+            </tr>
+            {% if boss.level %}
+            <tr>
+                <th>Level</th>
+                <td>{{ boss.level }}</td>
+            </tr>
+            {% endif %}
+            {% if boss.hitpoints %}
+            <tr>
+                <th>Hitpoints</th>
+                <td>{{ boss.hitpoints }}</td>
+            </tr>
+            {% endif %}
+        </table>
+    </div>
+
+    {# Boss room description section #}
+    {% if boss.room_description %}
+    <section class="description">
+        <h3>Boss Room</h3>
+        <p>{{ boss.room_description }}</p>
+    </section>
+    {% endif %}
+
+    {# Boss overall description section #}
+    {% if boss.description %}
+    <section class="description">
+        <h3>About</h3>
+        <p>{{ boss.description }}</p>
+    </section>
+    {% endif %}
+
+    {# Boss drops #}
+    {% if enriched_drops and enriched_drops | length > 0 %}
+    <section class="drops">
+        <h3>Drops</h3>
+        <table class="drop-table">
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Type</th>
+                    <th>Sell Price</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for drop in enriched_drops %}
+                <tr>
+                    <td>{{ drop.link_html | safe }}</td>
+                    <td>{% if drop.item_type %}{{ drop.item_type | type_link | safe }}{% else %}-{% endif %}</td>
+                    <td>{% if drop.sell_price %}{{ drop.sell_price }} gp{% else %}-{% endif %}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+    {% endif %}
+
+    {# Additional notes section #}
+    {% if boss.notes %}
+    <section class="notes-content">
+        <p>{{ boss.notes }}</p>
+    </section>
+    {% endif %}
+
+    {% if notes_html and notes_html | length > 0 %}
+    <section class="notes">
+        <h3>Notes</h3>
+        <div class="notes-content">
+            {{ notes_html | safe }}
+        </div>
+    </section>
+    {% endif %}
+</article>
+</main>
+{% endblock content %}

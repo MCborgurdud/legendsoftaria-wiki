@@ -4,7 +4,7 @@ use anyhow::{Context, Result};
 use tera::{Context as TeraContext, Tera};
 
 use crate::config;
-use crate::data::{enrich_drop, Item, Npc, Page};
+use crate::data::{enrich_drop, Item, Npc, Boss, BossRoom, Page};
 use crate::postprocess;
 
 pub fn init_tera() -> Result<Tera> {
@@ -42,6 +42,71 @@ pub fn render_items(tera: &Tera, items: &[Item]) -> Result<()> {
             .with_context(|| format!("failed to write item page {:?}", out_path))?;
 
         //println!("  → items/{}.html", item.id);
+    }
+
+    Ok(())
+}
+
+pub fn render_bosses(tera: &Tera, bosses: &[Boss], items: &[Item]) -> Result<()> {
+    let base = config::output_dir().join("bosses");
+    fs::create_dir_all(&base)?;
+
+    for boss in bosses {
+        let notes_html = crate::data::load_boss_notes(&boss.id)?;
+
+        let enriched_drops: Vec<_> = boss
+            .drops
+            .iter()
+            .map(|drop_name| enrich_drop(drop_name, items))
+            .collect();
+
+        let mut ctx = TeraContext::new();
+        ctx.insert("boss", boss);
+        ctx.insert("notes_html", &notes_html);
+        ctx.insert("enriched_drops", &enriched_drops);
+
+        let html = tera
+            .render("boss.html", &ctx)
+            .with_context(|| format!("failed to render boss {}", boss.id))?;
+
+        let out_path = base.join(format!("{}.html", boss.id));
+        fs::write(&out_path, html)
+            .with_context(|| format!("failed to write boss page {:?}", out_path))?;
+
+        //println!("  → bosses/{}.html", boss.id);
+    }
+
+    Ok(())
+}   
+
+pub fn render_boss_rooms(tera: &Tera, boss_rooms: &[BossRoom], items: &[Item]) -> Result<()> {
+    let base = config::output_dir().join("boss-rooms");
+    fs::create_dir_all(&base)?;
+
+    for boss_room in boss_rooms {
+        let notes_html = crate::data::load_boss_notes(&boss_room.id)?;
+
+        let enriched_drops: Vec<_> = boss_room
+        .bosses
+        .iter()
+        .flat_map(|boss| &boss.drops)
+        .map(|drop_name| enrich_drop(drop_name, items))
+        .collect();
+
+        let mut ctx = TeraContext::new();
+        ctx.insert("boss_room", boss_room);
+        ctx.insert("notes_html", &notes_html);  
+        ctx.insert("enriched_drops", &enriched_drops);
+
+        let html = tera
+            .render("boss_room.html", &ctx)
+            .with_context(|| format!("failed to render boss room {}", boss_room.id))?;
+
+        let out_path = base.join(format!("{}.html", boss_room.id));
+        fs::write(&out_path, html)
+            .with_context(|| format!("failed to write boss room page {:?}", out_path))?;
+
+        //println!("  → boss-rooms/{}.html", boss_room.id);
     }
 
     Ok(())
@@ -110,7 +175,7 @@ pub fn render_regular_pages(tera: &Tera, pages: &[Page]) -> Result<()> {
     Ok(())
 }
 
-pub fn render_indexes(tera: &Tera, items: &[Item], npcs: &[Npc], pages: &[Page]) -> Result<()> {
+pub fn render_indexes(tera: &Tera, items: &[Item], npcs: &[Npc], bosses: &[Boss], boss_rooms: &[BossRoom], pages: &[Page]) -> Result<()> {
     let regular_pages: Vec<&Page> = pages
         .iter()
         .filter(|p| !p.slug.starts_with("npcs/"))
@@ -119,6 +184,8 @@ pub fn render_indexes(tera: &Tera, items: &[Item], npcs: &[Npc], pages: &[Page])
     let mut ctx = TeraContext::new();
     ctx.insert("items", items);
     ctx.insert("npcs", npcs);
+    ctx.insert("bosses", bosses); 
+    ctx.insert("boss_rooms", boss_rooms);
     ctx.insert("pages", &regular_pages);
 
     // Render root index.html (child template living in html/ folder)
@@ -150,6 +217,39 @@ pub fn render_indexes(tera: &Tera, items: &[Item], npcs: &[Npc], pages: &[Page])
     fs::write(&npcs_index_path, npcs_html)
         .with_context(|| format!("failed to write npcs index {:?}", npcs_index_path))?;
     //println!("  → npcs/index.html");
+    let items_html = tera
+    .render("items_index.html", &ctx)
+    .context("failed to render items index")?;
+    let items_index_path = config::output_dir().join("items").join("index.html");
+    if let Some(parent) = items_index_path.parent() {
+    fs::create_dir_all(parent)?;
+   
+    fs::write(&items_index_path, items_html)
+        .with_context(|| format!("failed to write items index {:?}", items_index_path))?;
+}
+let bosses_html = tera
+    .render("bosses_index.html", &ctx)
+    .context("failed to render bosses index")?;
+let bosses_index_path = config::output_dir().join("bosses").join("index.html");
+if let Some(parent) = bosses_index_path.parent() {
+    fs::create_dir_all(parent)?;
+   
+    fs::write(&bosses_index_path, bosses_html)
+        .with_context(|| format!("failed to write bosses index {:?}", bosses_index_path))?;
 
-    Ok(())
+
+}
+let boss_rooms_html = tera
+    .render("boss_room_index.html", &ctx)
+    .context("failed to render boss rooms index")?;
+let boss_rooms_index_path = config::output_dir().join("boss-rooms").join("index.html");
+if let Some(parent) = boss_rooms_index_path.parent() {
+    fs::create_dir_all(parent)?;
+   
+    fs::write(&boss_rooms_index_path, boss_rooms_html)
+        .with_context(|| format!("failed to write boss rooms index {:?}", boss_rooms_index_path))?;
+}
+
+
+Ok(())
 }

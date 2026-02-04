@@ -22,6 +22,15 @@ static NPC_SHORT_PATTERN: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r#"<npc:([a-z0-9-]+)>"#).unwrap()
 });
 
+/// Regex pattern to match shorthand boss markup: <boss:boss-id>
+static BOSS_SHORT_PATTERN: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r#"<boss:([a-z0-9-]+)>"#).unwrap()
+});
+
+static BOSS_ROOM_SHORT_PATTERN: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r#"<bossroom:([a-z0-9-]+)>"#).unwrap()
+});
+
 /// Convert an id to a display name (e.g., "iron-ore" -> "Iron Ore")
 fn id_to_display_name(id: &str) -> String {
     id.split('-')
@@ -52,7 +61,26 @@ fn npc_link(npc_id: &str, display_text: &str) -> String {
     )
 }
 
-/// Post-process text to convert item and NPC markup into links with icons.
+/// Generate a boss link with icon
+fn boss_link(boss_id: &str, display_text: &str) -> String {
+    format!(
+        r#"<a href="/bosses/{}.html" class="boss-link"><img src="/assets/images/bosses/{}.png" alt="{}" class="inline-icon" />{}</a>"#,
+        boss_id, boss_id, display_text, display_text
+    )
+}
+
+/// Generate a boss room link with icon
+fn boss_room_link(boss_room_id: &str, display_text: &str) -> String {
+    format!(
+        r#"<a href="/boss-rooms/{}.html" class="boss-room-link"><img src="/assets/images/boss-rooms/{}.png" alt="{}" class="inline-icon" />{}</a>"#,
+        boss_room_id, boss_room_id, display_text, display_text
+    )
+}
+
+
+
+
+/// Post-process text to convert item, NPC, and boss markup into links with icons.
 pub fn linkify_references(text: &str) -> String {
     let mut result = text.to_string();
 
@@ -64,6 +92,8 @@ pub fn linkify_references(text: &str) -> String {
             item_link(item_id, display_text)
         })
         .to_string();
+
+
 
     // Handle verbose NPC syntax: <npc name="id">text</npc>
     result = NPC_PATTERN
@@ -92,6 +122,22 @@ pub fn linkify_references(text: &str) -> String {
         })
         .to_string();
 
+    // Handle shorthand boss syntax: <boss:id>
+    result = BOSS_SHORT_PATTERN
+        .replace_all(&result, |caps: &regex::Captures| {
+            let boss_id = &caps[1];
+            let display_text = id_to_display_name(boss_id);
+            boss_link(boss_id, &display_text)
+        })
+        .to_string();
+
+    result = BOSS_ROOM_SHORT_PATTERN
+        .replace_all(&result, |caps: &regex::Captures| {
+            let boss_room_id = &caps[1];
+            let display_text = id_to_display_name(boss_room_id);
+            boss_room_link(boss_room_id, &display_text)
+        })
+        .to_string();
     result
 }
 
@@ -123,3 +169,4 @@ pub fn make_item_type_link_filter() -> impl tera::Filter {
         }
     }
 }
+

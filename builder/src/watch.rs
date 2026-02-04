@@ -121,11 +121,15 @@ fn run_build(base_path: &Path) -> Result<()> {
     let items = crate::data::load_items()?;
     let npcs = crate::data::load_npcs()?;
     let pages = crate::data::load_pages()?;
+    let bosses = crate::data::load_bosses()?;
+    let boss_rooms = crate::data::load_boss_rooms()?;
 
     crate::render::render_items(&tera, &items)?;
     crate::render::render_npcs(&tera, &npcs, &items)?;
+    crate::render::render_bosses(&tera, &bosses, &items)?;
+    crate::render::render_boss_rooms(&tera, &boss_rooms, &items)?;
     crate::render::render_regular_pages(&tera, &pages)?;
-    crate::render::render_indexes(&tera, &items, &npcs, &pages)?;
+    crate::render::render_indexes(&tera, &items, &npcs, &bosses, &boss_rooms, &pages)?;
 
     Ok(())
 }

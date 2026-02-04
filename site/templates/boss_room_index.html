@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}Boss - Legends of Taria Wiki{% endblock title %}
+
+{% block content %}
+<section class="list-page">
+    <h2> All Boss Rooms</h2>
+    <p>Browse all {{ boss_rooms | length }} boss rooms in Legends of Taria.</p>
+
+    <div class="grid-list">
+        {% for boss_room in boss_rooms %}
+        <a href="/boss-rooms/{{ boss_room.id }}.html" class="grid-card">
+            <div class="grid-card-icon">
+                <img src="/assets/images/boss-rooms/{{ boss_room.id }}.png" alt="{{ boss_room.name }}" loading="lazy" />
+            </div>
+            <div class="grid-card-name">{{ boss_room.name }}</div>
+            <div class="grid-card-type">{{ boss_room.role }}</div>
+        </a>
+        {% else %}
+        <p>No boss rooms available.</p>
+        {% endfor %}
+    </div>
+</section>
+{% endblock content %}
