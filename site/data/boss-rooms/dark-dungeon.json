@@ -4,7 +4,10 @@
     "location": "The Dark Dungeon",
     "role": "Boss Room",
     "level": 10,
-    "hitpoints": 1000,
+    "hitpoints": 0,
     "notes": "A dark and mysterious dungeon filled with ancient secrets.",
-    "description": "The Dark Dungeon is a challenging room filled with traps and hidden dangers. It is home to powerful enemies and rare treasures."
+    "description": "It is home to powerful enemies and rare treasures.",
+    "bosses": [
+        "lich1"
+    ]
 }

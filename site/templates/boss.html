@@ -38,6 +38,18 @@
                 <td>{{ boss.hitpoints }}</td>
             </tr>
             {% endif %}
+            {% if boss.defense %}
+            <tr>
+                <th>Defense</th>
+                <td>{{ boss.defense }}</td>
+            </tr>
+            {% endif %}
+            {% if boss.magic %}
+            <tr>
+                <th>Magic</th>
+                <td>{{ boss.magic }}</td>
+            </tr>
+            {% endif %}
         </table>
     </div>
 

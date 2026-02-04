@@ -7,6 +7,7 @@
     "description": "Lich that can be fought for combat experience and loot.",
     "level": 40,
     "hitpoints": 60,
+    "defense": 40,
     "drops": [
         "Various items"
     ]

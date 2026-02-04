@@ -48,6 +48,27 @@
         <h3>About</h3>
         <p>{{ boss_room.description }}</p>
     </section>
+    {% if boss_room.bosses and boss_room.bosses | length > 0 %}
+<section class="bosses">
+    <h3>Bosses in this Room</h3>
+    <ul class="boss-list">
+        {% for boss in boss_room.bosses %}
+        <li class="boss-entry">
+            <img src="{{ boss.icon }}" alt="{{ boss.name }}" class="boss-icon" />
+            <div class="boss-details">
+                <strong>{{ boss.name }}</strong> ({{ boss.role }})
+                <p>{{ boss.description }}</p>
+                <ul>
+                    {% if boss.level %}<li>Level: {{ boss.level }}</li>{% endif %}
+                    {% if boss.hitpoints %}<li>HP: {{ boss.hitpoints }}</li>{% endif %}
+                    
+                </ul>
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+</section>
+{% endif %}
 
     {% if enriched_drops and enriched_drops | length > 0 %}
     <section class="drops">
